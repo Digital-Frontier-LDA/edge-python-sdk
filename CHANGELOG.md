@@ -34,9 +34,10 @@ forthcoming `0.1.0`; only the version string differs.
   wrapper version `0.1.0a1`.
 - Apache-2.0 license matching upstream.
 
-## [0.1.0] — TBD
+## [0.1.0] — 2026-05-13
 
-Wraps `latitudesh-python-sdk==3.0.5`.
+First public release. Wraps `latitudesh-python-sdk==3.0.5`. Released via the
+TestPyPI dry-run pipeline validated by `0.1.0a1` and `0.1.0a2`.
 
 ### Added
 - `EdgeClient(provider=...)` constructor supporting `provider="latitude"` and
@@ -44,6 +45,8 @@ Wraps `latitudesh-python-sdk==3.0.5`.
 - Three permissive-enum patches against upstream (sites, plans, operating systems).
 - `client.catalog.sites() / plans() / os() / refresh()` accessor.
 - Conformance test suite parameterised over both providers.
+- `edge_provider_sdk.__version__` sourced from installed package metadata so
+  it cannot drift from `pyproject.toml`.
 
 [Unreleased]: https://github.com/Digital-Frontier-LDA/edge-provider-sdk/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/Digital-Frontier-LDA/edge-provider-sdk/releases/tag/v0.1.0
