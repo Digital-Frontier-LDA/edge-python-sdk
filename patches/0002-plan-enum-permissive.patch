@@ -1,0 +1,61 @@
+From 087103b6875acce815ba2683500a21e83dbc8281 Mon Sep 17 00:00:00 2001
+From: edge-provider-sdk <edge-provider-sdk@example.com>
+Date: Wed, 13 May 2026 16:33:08 +0100
+Subject: [PATCH 2/3] plan-enum-permissive: replace CreateServerServersPlan
+ (str, Enum) with permissive str alias
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Affected:
+  - models/create_serverop.py: CreateServerServersPlan
+
+Adds _ORIGINAL_PLANS tuple in models/create_serverop.py with the 19 canonical
+Latitude plan slugs for strict validation when provider='latitude'.
+See SPEC.md §3, §4.
+
+diff --git a/src/latitudesh_python_sdk/models/create_serverop.py b/src/latitudesh_python_sdk/models/create_serverop.py
+index 2c024ef..138ba36 100644
+--- a/src/latitudesh_python_sdk/models/create_serverop.py
++++ b/src/latitudesh_python_sdk/models/create_serverop.py
+@@ -18,28 +18,18 @@ class CreateServerServersType(str, Enum):
+     SERVERS = "servers"
+ 
+ 
+-class CreateServerServersPlan(str, Enum):
+-    r"""The plan slug to choose server from, defining the specs the server will have"""
+-
+-    C2_LARGE_X86 = "c2-large-x86"
+-    C2_MEDIUM_X86 = "c2-medium-x86"
+-    C2_SMALL_X86 = "c2-small-x86"
+-    C3_LARGE_X86 = "c3-large-x86"
+-    C3_MEDIUM_X86 = "c3-medium-x86"
+-    C3_SMALL_X86 = "c3-small-x86"
+-    C3_XLARGE_X86 = "c3-xlarge-x86"
+-    G3_GH200 = "g3-gh200"
+-    G3_LARGE_X86 = "g3-large-x86"
+-    G3_MEDIUM_X86 = "g3-medium-x86"
+-    G3_SMALL_X86 = "g3-small-x86"
+-    G3_XLARGE_X86 = "g3-xlarge-x86"
+-    G4_RTX6KPRO_LARGE = "g4-rtx6kpro-large"
+-    M3_LARGE_X86 = "m3-large-x86"
+-    M4_METAL_LARGE = "m4-metal-large"
+-    M4_METAL_SMALL = "m4-metal-small"
+-    RS4_METAL_XLARGE = "rs4-metal-xlarge"
+-    S2_SMALL_X86 = "s2-small-x86"
+-    S3_LARGE_X86 = "s3-large-x86"
++# edge-provider-sdk patch: original Latitude plan slugs preserved for strict
++# validation when provider="latitude". Permissive alias below accepts any string.
++_ORIGINAL_PLANS = (
++    "c2-large-x86", "c2-medium-x86", "c2-small-x86",
++    "c3-large-x86", "c3-medium-x86", "c3-small-x86", "c3-xlarge-x86",
++    "g3-gh200", "g3-large-x86", "g3-medium-x86", "g3-small-x86", "g3-xlarge-x86",
++    "g4-rtx6kpro-large",
++    "m3-large-x86", "m4-metal-large", "m4-metal-small",
++    "rs4-metal-xlarge",
++    "s2-small-x86", "s3-large-x86",
++)
++CreateServerServersPlan = str
+ 
+ 
+ # edge-provider-sdk patch: original Latitude site slugs preserved for strict

@@ -1,0 +1,122 @@
+From 824bb81a94fe972649f5db1c3b3e6c9f259f900e Mon Sep 17 00:00:00 2001
+From: edge-provider-sdk <edge-provider-sdk@example.com>
+Date: Wed, 13 May 2026 16:33:39 +0100
+Subject: [PATCH 3/3] os-enum-permissive: replace 3 OS (str, Enum) classes with
+ permissive str aliases
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Affected:
+  - models/create_serverop.py: CreateServerServersOperatingSystem
+  - models/create_server_reinstallop.py: CreateServerReinstallServersOperatingSystem
+  - models/update_server_deploy_configop.py: UpdateServerDeployConfigServersOperatingSystem
+
+Adds _ORIGINAL_OS tuple in models/create_serverop.py with the 15 canonical
+Latitude OS slugs for strict validation when provider='latitude'.
+See SPEC.md §3, §4.
+
+diff --git a/src/latitudesh_python_sdk/models/create_server_reinstallop.py b/src/latitudesh_python_sdk/models/create_server_reinstallop.py
+index 4e4c587..2684dff 100644
+--- a/src/latitudesh_python_sdk/models/create_server_reinstallop.py
++++ b/src/latitudesh_python_sdk/models/create_server_reinstallop.py
+@@ -23,24 +23,9 @@ class CreateServerReinstallServersType(str, Enum):
+     REINSTALLS = "reinstalls"
+ 
+ 
+-class CreateServerReinstallServersOperatingSystem(str, Enum):
+-    r"""The OS selected for the reinstall process"""
+-
+-    CENTOS_7_4_X64 = "centos_7_4_x64"
+-    CENTOS_8_X64 = "centos_8_x64"
+-    DEBIAN_10 = "debian_10"
+-    DEBIAN_11 = "debian_11"
+-    DEBIAN_12 = "debian_12"
+-    IPXE = "ipxe"
+-    RHEL8 = "rhel8"
+-    ROCKYLINUX_8 = "rockylinux_8"
+-    UBUNTU22_ML_IN_A_BOX = "ubuntu22_ml_in_a_box"
+-    UBUNTU24_ML_IN_A_BOX = "ubuntu24_ml_in_a_box"
+-    UBUNTU_20_04_X64_LTS = "ubuntu_20_04_x64_lts"
+-    UBUNTU_22_04_X64_LTS = "ubuntu_22_04_x64_lts"
+-    UBUNTU_24_04_X64_LTS = "ubuntu_24_04_x64_lts"
+-    WINDOWS_2022_STD = "windows_2022_std"
+-    WINDOWS_SERVER_2019_STD_V1 = "windows_server_2019_std_v1"
++# edge-provider-sdk patch: permissive alias — accepts any string. Canonical
++# Latitude OS list lives in models.create_serverop._ORIGINAL_OS.
++CreateServerReinstallServersOperatingSystem = str
+ 
+ 
+ class CreateServerReinstallServersPartitionsTypedDict(TypedDict):
+diff --git a/src/latitudesh_python_sdk/models/create_serverop.py b/src/latitudesh_python_sdk/models/create_serverop.py
+index 138ba36..a34cf4f 100644
+--- a/src/latitudesh_python_sdk/models/create_serverop.py
++++ b/src/latitudesh_python_sdk/models/create_serverop.py
+@@ -42,24 +42,19 @@ _ORIGINAL_SITES = (
+ CreateServerServersSite = str
+ 
+ 
+-class CreateServerServersOperatingSystem(str, Enum):
+-    r"""The operating system slug for the new server"""
+-
+-    CENTOS_7_4_X64 = "centos_7_4_x64"
+-    CENTOS_8_X64 = "centos_8_x64"
+-    DEBIAN_10 = "debian_10"
+-    DEBIAN_11 = "debian_11"
+-    DEBIAN_12 = "debian_12"
+-    IPXE = "ipxe"
+-    RHEL8 = "rhel8"
+-    ROCKYLINUX_8 = "rockylinux_8"
+-    UBUNTU22_ML_IN_A_BOX = "ubuntu22_ml_in_a_box"
+-    UBUNTU24_ML_IN_A_BOX = "ubuntu24_ml_in_a_box"
+-    UBUNTU_20_04_X64_LTS = "ubuntu_20_04_x64_lts"
+-    UBUNTU_22_04_X64_LTS = "ubuntu_22_04_x64_lts"
+-    UBUNTU_24_04_X64_LTS = "ubuntu_24_04_x64_lts"
+-    WINDOWS_2022_STD = "windows_2022_std"
+-    WINDOWS_SERVER_2019_STD_V1 = "windows_server_2019_std_v1"
++# edge-provider-sdk patch: original Latitude OS slugs preserved for strict
++# validation when provider="latitude". Permissive alias below accepts any string.
++_ORIGINAL_OS = (
++    "centos_7_4_x64", "centos_8_x64",
++    "debian_10", "debian_11", "debian_12",
++    "ipxe",
++    "rhel8",
++    "rockylinux_8",
++    "ubuntu22_ml_in_a_box", "ubuntu24_ml_in_a_box",
++    "ubuntu_20_04_x64_lts", "ubuntu_22_04_x64_lts", "ubuntu_24_04_x64_lts",
++    "windows_2022_std", "windows_server_2019_std_v1",
++)
++CreateServerServersOperatingSystem = str
+ 
+ 
+ class CreateServerRaid(str, Enum):
+diff --git a/src/latitudesh_python_sdk/models/update_server_deploy_configop.py b/src/latitudesh_python_sdk/models/update_server_deploy_configop.py
+index 20f5ec1..4e314f4 100644
+--- a/src/latitudesh_python_sdk/models/update_server_deploy_configop.py
++++ b/src/latitudesh_python_sdk/models/update_server_deploy_configop.py
+@@ -23,22 +23,9 @@ class UpdateServerDeployConfigServersType(str, Enum):
+     DEPLOY_CONFIG = "deploy_config"
+ 
+ 
+-class UpdateServerDeployConfigServersOperatingSystem(str, Enum):
+-    CENTOS_7_4_X64 = "centos_7_4_x64"
+-    CENTOS_8_X64 = "centos_8_x64"
+-    DEBIAN_10 = "debian_10"
+-    DEBIAN_11 = "debian_11"
+-    DEBIAN_12 = "debian_12"
+-    IPXE = "ipxe"
+-    RHEL8 = "rhel8"
+-    ROCKYLINUX_8 = "rockylinux_8"
+-    UBUNTU22_ML_IN_A_BOX = "ubuntu22_ml_in_a_box"
+-    UBUNTU24_ML_IN_A_BOX = "ubuntu24_ml_in_a_box"
+-    UBUNTU_20_04_X64_LTS = "ubuntu_20_04_x64_lts"
+-    UBUNTU_22_04_X64_LTS = "ubuntu_22_04_x64_lts"
+-    UBUNTU_24_04_X64_LTS = "ubuntu_24_04_x64_lts"
+-    WINDOWS_2022_STD = "windows_2022_std"
+-    WINDOWS_SERVER_2019_STD_V1 = "windows_server_2019_std_v1"
++# edge-provider-sdk patch: permissive alias — accepts any string. Canonical
++# Latitude OS list lives in models.create_serverop._ORIGINAL_OS.
++UpdateServerDeployConfigServersOperatingSystem = str
+ 
+ 
+ class UpdateServerDeployConfigServersRaid(str, Enum):

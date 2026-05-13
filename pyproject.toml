@@ -1,0 +1,89 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "edge-provider-sdk"
+version = "0.1.0"
+description = "Single Python client for Latitude-shaped compute providers — wraps latitudesh-python-sdk with permissive catalog enums."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+authors = [{ name = "edge-provider-sdk contributors" }]
+keywords = ["latitude", "bare-metal", "compute", "sdk", "digital-frontier", "akash"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Distributed Computing",
+]
+dependencies = [
+    "latitudesh-python-sdk==3.0.5",
+    "httpx>=0.27",
+    "pydantic>=2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "pytest-asyncio>=0.23",
+    "respx>=0.21",
+    "ruff>=0.6",
+    "mypy>=1.11",
+]
+
+[project.urls]
+Homepage = "https://github.com/jobordu/edge-provider-sdk"
+Issues = "https://github.com/jobordu/edge-provider-sdk/issues"
+Changelog = "https://github.com/jobordu/edge-provider-sdk/blob/main/CHANGELOG.md"
+
+[tool.edge-provider-sdk]
+upstream-package = "latitudesh-python-sdk"
+upstream-version = "3.0.5"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/edge_provider_sdk"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/edge_provider_sdk",
+    "patches",
+    "scripts",
+    "docs",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md",
+    "SPEC.md",
+    "pyproject.toml",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"src/edge_provider_sdk/_generated/**" = ["ALL"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+exclude = ["src/edge_provider_sdk/_generated/"]
+
+[[tool.mypy.overrides]]
+module = "edge_provider_sdk._generated.*"
+ignore_errors = true
+follow_imports = "skip"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
