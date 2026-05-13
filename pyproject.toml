@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "edge-provider-sdk"
-version = "0.1.0"
+version = "0.1.0a1"
 description = "Single Python client for Latitude-shaped compute providers — wraps latitudesh-python-sdk with permissive catalog enums."
 readme = "README.md"
 license = { file = "LICENSE" }
