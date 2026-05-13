@@ -39,19 +39,23 @@ exchange is gated by the workflow's `if:` conditions.
 ### Alpha (TestPyPI dry-run)
 
 ```bash
-# 1. Bump pyproject.toml + CHANGELOG to e.g. 0.1.0a1 (PEP 440 form).
+# 1. Bump pyproject.toml + CHANGELOG to 0.1.0a1 (PEP 440 prerelease form —
+#    `0.1.0-alpha.1` is not PEP 440-valid in pyproject.toml).
 # 2. Commit on a release-prep branch, open a PR, merge.
 
 git checkout main
 git pull
-git tag v0.1.0-alpha.1
-git push origin v0.1.0-alpha.1
+# Either tag style works — release.yml compares via packaging.version.Version,
+# which normalises both forms. Pick whichever you prefer to read.
+git tag v0.1.0a1                # or: git tag v0.1.0-alpha.1
+git push origin v0.1.0a1
 
 # 3. On GitHub, click "Draft a new release", pick the tag, check
 #    "Set as a pre-release", publish.
 # 4. Watch the Release workflow run. `publish-testpypi` should succeed;
 #    `publish-pypi` is skipped.
-# 5. Sanity-install:
+# 5. Sanity-install (TestPyPI doesn't host runtime deps, so use --extra-index-url
+#    to pull `latitudesh-python-sdk` and the rest from real PyPI):
 pip install --index-url https://test.pypi.org/simple/ \
             --extra-index-url https://pypi.org/simple/ \
             edge-provider-sdk==0.1.0a1

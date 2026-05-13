@@ -28,16 +28,25 @@ jobs:
       # the version declared in pyproject.toml. Without this, a forgotten
       # version bump would publish under the wrong number and burn the
       # release slot on PyPI.
+      #
+      # We compare via `packaging.version.Version` rather than string equality
+      # so the human-friendly tag `v0.1.0-alpha.1` matches the PEP 440 form
+      # `0.1.0a1` that pyproject.toml must use.
       - name: Verify tag matches pyproject version
         run: |
           set -euo pipefail
           tag_version="${GITHUB_REF#refs/tags/v}"
           pyproject_version="$(awk -F\" '/^version[[:space:]]*=/ {print $2; exit}' pyproject.toml)"
-          if [[ "${tag_version}" != "${pyproject_version}" ]]; then
-            echo "::error::Release tag v${tag_version} does not match pyproject.toml version ${pyproject_version}"
-            exit 1
-          fi
-          echo "Tag v${tag_version} matches pyproject.toml version ${pyproject_version}"
+          uv run --with packaging python - <<EOF
+          from packaging.version import Version
+          tag = Version("${tag_version}")
+          pyproject = Version("${pyproject_version}")
+          if tag != pyproject:
+              raise SystemExit(
+                  f"::error::Release tag v{tag} does not match pyproject.toml version {pyproject}"
+              )
+          print(f"Tag v{tag} matches pyproject.toml version {pyproject}")
+          EOF
 
       - name: Apply upstream patches
         run: ./scripts/apply-patches.sh
