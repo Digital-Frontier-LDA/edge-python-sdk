@@ -8,21 +8,76 @@ permissions:
   contents: read
   id-token: write  # OIDC for PyPI trusted publishing
 
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   publish:
     runs-on: ubuntu-latest
-    environment: pypi
+    timeout-minutes: 10
+    environment:
+      name: pypi
+      url: https://pypi.org/project/edge-provider-sdk/
     steps:
       - uses: actions/checkout@v4
 
       - name: Install uv
         uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+          cache-dependency-glob: "pyproject.toml"
+
+      # Guard against a mismatch between the release tag (e.g. v0.2.0) and
+      # the version declared in pyproject.toml. Without this, a forgotten
+      # version bump would publish under the wrong number and burn the
+      # release slot on PyPI.
+      - name: Verify tag matches pyproject version
+        run: |
+          set -euo pipefail
+          tag_version="${GITHUB_REF#refs/tags/v}"
+          pyproject_version="$(awk -F\" '/^version[[:space:]]*=/ {print $2; exit}' pyproject.toml)"
+          if [[ "${tag_version}" != "${pyproject_version}" ]]; then
+            echo "::error::Release tag v${tag_version} does not match pyproject.toml version ${pyproject_version}"
+            exit 1
+          fi
+          echo "Tag v${tag_version} matches pyproject.toml version ${pyproject_version}"
 
       - name: Apply upstream patches
         run: ./scripts/apply-patches.sh
 
-      - name: Build sdist + wheel
-        run: uv build
+      # Build sdist and wheel as separate hatch invocations. `uv build`
+      # without flags builds sdist first and then derives the wheel *from*
+      # the sdist — but our sdist excludes `_generated/` (it ships the
+      # recipe, not the result), which would yield a wheel missing 278
+      # files. Building each from source independently fixes that.
+      - name: Build sdist (recipe — patches + scripts + sources)
+        run: uv build --sdist
 
-      - name: Publish to PyPI (OIDC)
+      - name: Build wheel (fully-patched, ready to import)
+        run: uv build --wheel
+
+      - name: Inspect artifacts
+        run: |
+          set -euo pipefail
+          ls -la dist/
+          # Sanity-check the wheel actually includes the patched _generated/ tree.
+          generated_count="$(unzip -l dist/*.whl | grep -c 'edge_provider_sdk/_generated/' || true)"
+          if [[ "${generated_count}" -lt 100 ]]; then
+            echo "::error::Wheel only contains ${generated_count} _generated/ files — expected ≥100"
+            exit 1
+          fi
+          echo "Wheel contains ${generated_count} _generated/ files."
+
+      - name: Validate distribution metadata
+        run: |
+          uv tool run twine check dist/*
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 30
+
+      - name: Publish to PyPI (OIDC trusted publishing)
         uses: pypa/gh-action-pypi-publish@release/v1

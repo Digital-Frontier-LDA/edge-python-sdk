@@ -2,6 +2,7 @@ name: Sync upstream
 
 on:
   schedule:
+    # Daily at 06:17 UTC — staggered to avoid the top-of-hour cron rush.
     - cron: "17 6 * * *"
   workflow_dispatch:
 
@@ -9,16 +10,205 @@ permissions:
   contents: write
   pull-requests: write
 
+concurrency:
+  group: sync-upstream
+  cancel-in-progress: false
+
 jobs:
-  check:
+  check-and-bump:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
       - name: Install uv
         uses: astral-sh/setup-uv@v3
 
-      # Real implementation pending — see SPEC.md §7 (`sync-upstream.yml`)
-      # and §13 step 7. The script currently exits 64 (scaffold marker).
-      - name: Check for newer upstream release
-        run: ./scripts/refresh-upstream.sh || [ "$?" = "64" ]
+      - name: Set up Python 3.13
+        run: uv python install 3.13
+
+      - name: Detect upstream version drift
+        id: drift
+        run: |
+          set -euo pipefail
+          latest="$(./scripts/refresh-upstream.sh)" || exit 1
+          if [[ -z "${latest}" ]]; then
+            echo "Already pinned to latest — no PR needed."
+            echo "needs_bump=false" >> "$GITHUB_OUTPUT"
+          else
+            current="$(awk '/^\[tool\.edge-provider-sdk\]/{s=1;next} /^\[/{s=0} s && /^upstream-version[[:space:]]*=/{gsub(/.*=[[:space:]]*"|"[[:space:]]*$/, ""); print; exit}' pyproject.toml)"
+            {
+              echo "needs_bump=true"
+              echo "from_version=${current}"
+              echo "to_version=${latest}"
+            } >> "$GITHUB_OUTPUT"
+            echo "Will attempt bump: ${current} -> ${latest}"
+          fi
+
+      - name: Check if PR already exists for this bump
+        if: steps.drift.outputs.needs_bump == 'true'
+        id: existing
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          branch="sync/upstream-${{ steps.drift.outputs.to_version }}"
+          echo "branch=${branch}" >> "$GITHUB_OUTPUT"
+          if gh pr list --state open --head "${branch}" --json number | grep -q '"number"'; then
+            echo "PR for ${branch} already open — skipping."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Bump pin in pyproject.toml
+        if: steps.drift.outputs.needs_bump == 'true' && steps.existing.outputs.skip != 'true'
+        env:
+          FROM: ${{ steps.drift.outputs.from_version }}
+          TO: ${{ steps.drift.outputs.to_version }}
+        run: |
+          set -euo pipefail
+          python3 - <<EOF
+          from pathlib import Path
+          p = Path("pyproject.toml")
+          text = p.read_text()
+          text = text.replace(
+              'upstream-version = "${FROM}"',
+              'upstream-version = "${TO}"',
+              1,
+          )
+          text = text.replace(
+              '"latitudesh-python-sdk==${FROM}"',
+              '"latitudesh-python-sdk==${TO}"',
+              1,
+          )
+          p.write_text(text)
+          EOF
+          grep -E 'upstream-version|latitudesh-python-sdk==' pyproject.toml
+
+      - name: Try applying patches against new upstream
+        if: steps.drift.outputs.needs_bump == 'true' && steps.existing.outputs.skip != 'true'
+        id: patch_attempt
+        run: |
+          set +e
+          rm -rf .upstream-cache src/edge_provider_sdk/_generated
+          ./scripts/apply-patches.sh 2>&1 | tee patch-log.txt
+          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+
+      - name: Run tests if patches applied
+        if: |
+          steps.drift.outputs.needs_bump == 'true'
+          && steps.existing.outputs.skip != 'true'
+          && steps.patch_attempt.outputs.exit_code == '0'
+        id: tests
+        run: |
+          set +e
+          uv sync --all-extras
+          uv run pytest -q 2>&1 | tee test-log.txt
+          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+
+      - name: Open clean-bump PR
+        if: |
+          steps.drift.outputs.needs_bump == 'true'
+          && steps.existing.outputs.skip != 'true'
+          && steps.patch_attempt.outputs.exit_code == '0'
+          && steps.tests.outputs.exit_code == '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FROM: ${{ steps.drift.outputs.from_version }}
+          TO: ${{ steps.drift.outputs.to_version }}
+          BRANCH: ${{ steps.existing.outputs.branch }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "${BRANCH}"
+          git add pyproject.toml
+          git commit -m "sync: bump upstream to ${TO}"
+          git push origin "${BRANCH}"
+          gh pr create \
+            --title "sync: bump upstream to ${TO}" \
+            --body "Auto-detected newer upstream release.
+
+          - Upstream: latitudesh-python-sdk ${FROM} → ${TO}
+          - All 3 patches applied cleanly.
+          - Full test suite passed locally in CI.
+
+          Merge if green." \
+            --head "${BRANCH}"
+
+      - name: Open rebase-needed PR (patches conflict)
+        if: |
+          steps.drift.outputs.needs_bump == 'true'
+          && steps.existing.outputs.skip != 'true'
+          && steps.patch_attempt.outputs.exit_code != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FROM: ${{ steps.drift.outputs.from_version }}
+          TO: ${{ steps.drift.outputs.to_version }}
+          BRANCH: ${{ steps.existing.outputs.branch }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "${BRANCH}"
+          git add pyproject.toml
+          git commit -m "sync: bump upstream to ${TO} (patches need manual rebase)"
+          git push origin "${BRANCH}"
+
+          # Embed the failure log so a maintainer can see what conflicted
+          # without round-tripping to the CI logs.
+          {
+            echo "Auto-detected newer upstream release, but **patches no longer apply cleanly**."
+            echo ""
+            echo "- Upstream: latitudesh-python-sdk ${FROM} → ${TO}"
+            echo "- Action: re-generate patches against the new sdist and update \`patches/\`."
+            echo ""
+            echo "## apply-patches.sh log"
+            echo ""
+            echo '```'
+            tail -c 32000 patch-log.txt
+            echo '```'
+          } > pr-body.md
+          gh pr create \
+            --title "sync: bump upstream to ${TO} — patches need rebase" \
+            --body-file pr-body.md \
+            --head "${BRANCH}" \
+            --label "needs-rebase"
+
+      - name: Open tests-failing PR (patches applied, tests broke)
+        if: |
+          steps.drift.outputs.needs_bump == 'true'
+          && steps.existing.outputs.skip != 'true'
+          && steps.patch_attempt.outputs.exit_code == '0'
+          && steps.tests.outputs.exit_code != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FROM: ${{ steps.drift.outputs.from_version }}
+          TO: ${{ steps.drift.outputs.to_version }}
+          BRANCH: ${{ steps.existing.outputs.branch }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "${BRANCH}"
+          git add pyproject.toml
+          git commit -m "sync: bump upstream to ${TO} (test failures — needs investigation)"
+          git push origin "${BRANCH}"
+          {
+            echo "Auto-detected newer upstream release. Patches still apply cleanly, but **tests fail**."
+            echo ""
+            echo "- Upstream: latitudesh-python-sdk ${FROM} → ${TO}"
+            echo "- Likely cause: upstream changed a response shape, request path, or model field name."
+            echo ""
+            echo "## pytest log"
+            echo ""
+            echo '```'
+            tail -c 32000 test-log.txt
+            echo '```'
+          } > pr-body.md
+          gh pr create \
+            --title "sync: bump upstream to ${TO} — test failures" \
+            --body-file pr-body.md \
+            --head "${BRANCH}" \
+            --label "needs-investigation"

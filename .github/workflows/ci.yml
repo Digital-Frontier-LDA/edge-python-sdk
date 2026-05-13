@@ -8,9 +8,14 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
@@ -20,10 +25,15 @@ jobs:
 
       - name: Install uv
         uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+          cache-dependency-glob: "pyproject.toml"
 
       - name: Set up Python ${{ matrix.python }}
         run: uv python install ${{ matrix.python }}
 
+      # `patch` and `tar` are part of the ubuntu-latest base image — no apt
+      # install needed. The script will download the upstream sdist from PyPI.
       - name: Apply upstream patches
         run: ./scripts/apply-patches.sh
 
@@ -36,5 +46,39 @@ jobs:
       - name: Type check
         run: uv run mypy src
 
+      # EDGE_PROVIDER_INTEGRATION is unset → integration tests skip cleanly.
       - name: Tests
         run: uv run pytest -q
+
+  build:
+    # Verify the wheel + sdist build on at least one matrix slot so we catch
+    # packaging regressions before a release tag is cut.
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+          cache-dependency-glob: "pyproject.toml"
+
+      - name: Apply upstream patches
+        run: ./scripts/apply-patches.sh
+
+      # Same two-step rationale as release.yml — see comments there.
+      - name: Build sdist
+        run: uv build --sdist
+
+      - name: Build wheel
+        run: uv build --wheel
+
+      - name: List artifacts
+        run: ls -la dist/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7

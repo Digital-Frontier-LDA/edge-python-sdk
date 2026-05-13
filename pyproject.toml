@@ -49,6 +49,10 @@ upstream-version = "3.0.5"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/edge_provider_sdk"]
+# `_generated/` is gitignored (it's built from patches/, not authored), so by
+# default hatch's gitignore-aware file selector would drop it from the wheel.
+# `artifacts` overrides that — the patched SDK *is* what wheel consumers need.
+artifacts = ["src/edge_provider_sdk/_generated/**"]
 
 [tool.hatch.build.targets.sdist]
 include = [
@@ -62,6 +66,9 @@ include = [
     "SPEC.md",
     "pyproject.toml",
 ]
+# The sdist ships only the *recipe* — patches + apply-patches.sh — so any
+# rebuild from sdist regenerates `_generated/` against the pinned upstream.
+exclude = ["src/edge_provider_sdk/_generated/**"]
 
 [tool.ruff]
 line-length = 100
