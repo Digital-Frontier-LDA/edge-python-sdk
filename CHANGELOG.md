@@ -10,6 +10,18 @@ see [`SPEC.md` §6](./SPEC.md#6-versioning-policy).
 
 ## [Unreleased]
 
+## [0.1.0a2] — 2026-05-13
+
+Second TestPyPI pre-release. The `0.1.0a1` install surfaced a hardcoded
+`__version__` in `edge_provider_sdk/__init__.py` that would drift from
+`pyproject.toml` on every bump. Re-validates the release pipeline with that
+fixed before promoting to PyPI as `0.1.0`.
+
+### Fixed
+- `edge_provider_sdk.__version__` now reads from `importlib.metadata` so it
+  always matches the installed package's `pyproject.toml` version (was
+  hardcoded to `"0.1.0"`).
+
 ## [0.1.0a1] — 2026-05-13
 
 First TestPyPI pre-release — dry-runs the release pipeline end-to-end against
@@ -35,4 +47,5 @@ Wraps `latitudesh-python-sdk==3.0.5`.
 
 [Unreleased]: https://github.com/Digital-Frontier-LDA/edge-provider-sdk/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/Digital-Frontier-LDA/edge-provider-sdk/releases/tag/v0.1.0
+[0.1.0a2]: https://github.com/Digital-Frontier-LDA/edge-provider-sdk/releases/tag/v0.1.0-alpha.2
 [0.1.0a1]: https://github.com/Digital-Frontier-LDA/edge-provider-sdk/releases/tag/v0.1.0-alpha.1
