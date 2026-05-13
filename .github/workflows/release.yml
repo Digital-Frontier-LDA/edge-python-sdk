@@ -6,19 +6,15 @@ on:
 
 permissions:
   contents: read
-  id-token: write  # OIDC for PyPI trusted publishing
 
 concurrency:
   group: release-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  publish:
+  build:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    environment:
-      name: pypi
-      url: https://pypi.org/project/edge-provider-sdk/
     steps:
       - uses: actions/checkout@v4
 
@@ -70,14 +66,54 @@ jobs:
           echo "Wheel contains ${generated_count} _generated/ files."
 
       - name: Validate distribution metadata
-        run: |
-          uv tool run twine check dist/*
+        run: uv tool run twine check dist/*
 
       - uses: actions/upload-artifact@v4
         with:
           name: dist
           path: dist/
           retention-days: 30
+
+  publish-testpypi:
+    # Pre-release tags (e.g. v0.1.0-alpha.1) — dry-run to TestPyPI. Lets us
+    # validate the full pipeline + the published metadata before burning a
+    # release slot on real PyPI.
+    if: github.event.release.prerelease == true
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/project/edge-provider-sdk/
+    permissions:
+      id-token: write  # OIDC for trusted publishing
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Publish to TestPyPI (OIDC trusted publishing)
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+
+  publish-pypi:
+    # Full releases (e.g. v0.1.0) — publish to the real index.
+    if: github.event.release.prerelease == false
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment:
+      name: pypi
+      url: https://pypi.org/project/edge-provider-sdk/
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
 
       - name: Publish to PyPI (OIDC trusted publishing)
         uses: pypa/gh-action-pypi-publish@release/v1
