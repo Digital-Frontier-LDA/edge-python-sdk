@@ -27,5 +27,5 @@ Wraps `latitudesh-python-sdk==3.0.5`.
 - `client.catalog.sites() / plans() / os() / refresh()` accessor.
 - Conformance test suite parameterised over both providers.
 
-[Unreleased]: https://github.com/jobordu/edge-provider-sdk/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/jobordu/edge-provider-sdk/releases/tag/v0.1.0
+[Unreleased]: https://github.com/Digital-Frontier-LDA/edge-provider-sdk/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/Digital-Frontier-LDA/edge-provider-sdk/releases/tag/v0.1.0

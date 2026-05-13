@@ -39,9 +39,9 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/jobordu/edge-provider-sdk"
-Issues = "https://github.com/jobordu/edge-provider-sdk/issues"
-Changelog = "https://github.com/jobordu/edge-provider-sdk/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/Digital-Frontier-LDA/edge-provider-sdk"
+Issues = "https://github.com/Digital-Frontier-LDA/edge-provider-sdk/issues"
+Changelog = "https://github.com/Digital-Frontier-LDA/edge-provider-sdk/blob/main/CHANGELOG.md"
 
 [tool.edge-provider-sdk]
 upstream-package = "latitudesh-python-sdk"
