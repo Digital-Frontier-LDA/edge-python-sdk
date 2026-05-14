@@ -10,6 +10,16 @@ see [`SPEC.md` §6](./SPEC.md#6-versioning-policy).
 
 ## [Unreleased]
 
+## [0.1.1] — 2026-05-14
+
+### Fixed
+- `edge_provider_sdk.models` now actually re-exports the model namespace from
+  the patched `_generated/` SDK. In `0.1.0` the module was a placeholder
+  docstring, so `from edge_provider_sdk.models import APIError,
+  ResponseValidationError` (or any other model class) raised `AttributeError`.
+  Re-exports are lazy — the wrapper delegates `__getattr__` to
+  `_generated.models`, so startup cost is unchanged.
+
 ## [0.1.0a2] — 2026-05-13
 
 Second TestPyPI pre-release. The `0.1.0a1` install surfaced a hardcoded
@@ -48,7 +58,8 @@ TestPyPI dry-run pipeline validated by `0.1.0a1` and `0.1.0a2`.
 - `edge_provider_sdk.__version__` sourced from installed package metadata so
   it cannot drift from `pyproject.toml`.
 
-[Unreleased]: https://github.com/Digital-Frontier-LDA/edge-provider-sdk/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/Digital-Frontier-LDA/edge-provider-sdk/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/Digital-Frontier-LDA/edge-provider-sdk/releases/tag/v0.1.1
 [0.1.0]: https://github.com/Digital-Frontier-LDA/edge-provider-sdk/releases/tag/v0.1.0
 [0.1.0a2]: https://github.com/Digital-Frontier-LDA/edge-provider-sdk/releases/tag/v0.1.0-alpha.2
 [0.1.0a1]: https://github.com/Digital-Frontier-LDA/edge-provider-sdk/releases/tag/v0.1.0-alpha.1
