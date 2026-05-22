@@ -17,9 +17,9 @@ GitHub. Each one needs a pending publisher registered:
 1. Log in to <https://test.pypi.org> with the account that should own the project.
 2. Go to **Account settings → Publishing**.
 3. Add a new **pending publisher** with:
-   - PyPI Project Name: `edge-provider-sdk`
+   - PyPI Project Name: `edge-python-sdk`
    - Owner: `Digital-Frontier-LDA`
-   - Repository name: `edge-provider-sdk`
+   - Repository name: `edge-python-sdk`
    - Workflow name: `release.yml`
    - Environment name: `testpypi`
 
@@ -58,8 +58,8 @@ git push origin v0.1.0a1
 #    to pull `latitudesh-python-sdk` and the rest from real PyPI):
 pip install --index-url https://test.pypi.org/simple/ \
             --extra-index-url https://pypi.org/simple/ \
-            edge-provider-sdk==0.1.0a1
-python -c "import edge_provider_sdk; print(edge_provider_sdk.__version__)"
+            edge-python-sdk==0.1.0a1
+python -c "import edge_python_sdk; print(edge_python_sdk.__version__)"
 ```
 
 ### Real release (PyPI)
@@ -74,7 +74,7 @@ git push origin v0.1.0
 # 2. On GitHub, "Draft a new release", pick v0.1.0, leave pre-release
 #    unchecked, publish. The `publish-pypi` job runs.
 # 3. Verify:
-pip install edge-provider-sdk==0.1.0
+pip install edge-python-sdk==0.1.0
 ```
 
 ## What the workflow guards against

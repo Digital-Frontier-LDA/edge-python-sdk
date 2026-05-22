@@ -13,9 +13,9 @@ see [`SPEC.md` §6](./SPEC.md#6-versioning-policy).
 ## [0.1.1] — 2026-05-14
 
 ### Fixed
-- `edge_provider_sdk.models` now actually re-exports the model namespace from
+- `edge_python_sdk.models` now actually re-exports the model namespace from
   the patched `_generated/` SDK. In `0.1.0` the module was a placeholder
-  docstring, so `from edge_provider_sdk.models import APIError,
+  docstring, so `from edge_python_sdk.models import APIError,
   ResponseValidationError` (or any other model class) raised `AttributeError`.
   Re-exports are lazy — the wrapper delegates `__getattr__` to
   `_generated.models`, so startup cost is unchanged.
@@ -23,12 +23,12 @@ see [`SPEC.md` §6](./SPEC.md#6-versioning-policy).
 ## [0.1.0a2] — 2026-05-13
 
 Second TestPyPI pre-release. The `0.1.0a1` install surfaced a hardcoded
-`__version__` in `edge_provider_sdk/__init__.py` that would drift from
+`__version__` in `edge_python_sdk/__init__.py` that would drift from
 `pyproject.toml` on every bump. Re-validates the release pipeline with that
 fixed before promoting to PyPI as `0.1.0`.
 
 ### Fixed
-- `edge_provider_sdk.__version__` now reads from `importlib.metadata` so it
+- `edge_python_sdk.__version__` now reads from `importlib.metadata` so it
   always matches the installed package's `pyproject.toml` version (was
   hardcoded to `"0.1.0"`).
 
@@ -55,11 +55,11 @@ TestPyPI dry-run pipeline validated by `0.1.0a1` and `0.1.0a2`.
 - Three permissive-enum patches against upstream (sites, plans, operating systems).
 - `client.catalog.sites() / plans() / os() / refresh()` accessor.
 - Conformance test suite parameterised over both providers.
-- `edge_provider_sdk.__version__` sourced from installed package metadata so
+- `edge_python_sdk.__version__` sourced from installed package metadata so
   it cannot drift from `pyproject.toml`.
 
-[Unreleased]: https://github.com/Digital-Frontier-LDA/edge-provider-sdk/compare/v0.1.1...HEAD
-[0.1.1]: https://github.com/Digital-Frontier-LDA/edge-provider-sdk/releases/tag/v0.1.1
-[0.1.0]: https://github.com/Digital-Frontier-LDA/edge-provider-sdk/releases/tag/v0.1.0
-[0.1.0a2]: https://github.com/Digital-Frontier-LDA/edge-provider-sdk/releases/tag/v0.1.0-alpha.2
-[0.1.0a1]: https://github.com/Digital-Frontier-LDA/edge-provider-sdk/releases/tag/v0.1.0-alpha.1
+[Unreleased]: https://github.com/Digital-Frontier-LDA/edge-python-sdk/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/Digital-Frontier-LDA/edge-python-sdk/releases/tag/v0.1.1
+[0.1.0]: https://github.com/Digital-Frontier-LDA/edge-python-sdk/releases/tag/v0.1.0
+[0.1.0a2]: https://github.com/Digital-Frontier-LDA/edge-python-sdk/releases/tag/v0.1.0-alpha.2
+[0.1.0a1]: https://github.com/Digital-Frontier-LDA/edge-python-sdk/releases/tag/v0.1.0-alpha.1

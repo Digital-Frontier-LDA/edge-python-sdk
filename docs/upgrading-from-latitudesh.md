@@ -11,7 +11,7 @@ from latitudesh_python_sdk import Latitudesh
 client = Latitudesh(bearer="lt_...")
 
 # After
-from edge_provider_sdk import EdgeClient
+from edge_python_sdk import EdgeClient
 client = EdgeClient(provider="latitude", bearer="lt_...")
 ```
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # refresh-upstream.sh — check PyPI for a newer latitudesh-python-sdk release.
 #
-# - Reads the pinned version from `[tool.edge-provider-sdk].upstream-version`
+# - Reads the pinned version from `[tool.edge-python-sdk].upstream-version`
 #   in pyproject.toml.
 # - Queries PyPI's JSON API for the latest released version.
 # - Prints the latest version on stdout when it differs from the pin.
@@ -18,7 +18,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 CURRENT_PIN="$(
   awk '
-    /^\[tool\.edge-provider-sdk\]/ { in_section = 1; next }
+    /^\[tool\.edge-python-sdk\]/ { in_section = 1; next }
     /^\[/ { in_section = 0 }
     in_section && /^upstream-version[[:space:]]*=/ {
       gsub(/.*=[[:space:]]*"|"[[:space:]]*$/, "")
@@ -29,7 +29,7 @@ CURRENT_PIN="$(
 )"
 
 if [[ -z "${CURRENT_PIN}" ]]; then
-  echo "ERROR: could not read [tool.edge-provider-sdk].upstream-version from pyproject.toml" >&2
+  echo "ERROR: could not read [tool.edge-python-sdk].upstream-version from pyproject.toml" >&2
   exit 1
 fi
 

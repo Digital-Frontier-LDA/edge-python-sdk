@@ -36,7 +36,7 @@ jobs:
             echo "Already pinned to latest — no PR needed."
             echo "needs_bump=false" >> "$GITHUB_OUTPUT"
           else
-            current="$(awk '/^\[tool\.edge-provider-sdk\]/{s=1;next} /^\[/{s=0} s && /^upstream-version[[:space:]]*=/{gsub(/.*=[[:space:]]*"|"[[:space:]]*$/, ""); print; exit}' pyproject.toml)"
+            current="$(awk '/^\[tool\.edge-python-sdk\]/{s=1;next} /^\[/{s=0} s && /^upstream-version[[:space:]]*=/{gsub(/.*=[[:space:]]*"|"[[:space:]]*$/, ""); print; exit}' pyproject.toml)"
             {
               echo "needs_bump=true"
               echo "from_version=${current}"
@@ -91,7 +91,7 @@ jobs:
         id: patch_attempt
         run: |
           set +e
-          rm -rf .upstream-cache src/edge_provider_sdk/_generated
+          rm -rf .upstream-cache src/edge_python_sdk/_generated
           ./scripts/apply-patches.sh 2>&1 | tee patch-log.txt
           echo "exit_code=$?" >> "$GITHUB_OUTPUT"
 

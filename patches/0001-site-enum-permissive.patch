@@ -1,5 +1,5 @@
 From c1058cc70867983a0265d06a747ae91e6107ba9c Mon Sep 17 00:00:00 2001
-From: edge-provider-sdk <edge-provider-sdk@example.com>
+From: edge-python-sdk <edge-python-sdk@example.com>
 Date: Wed, 13 May 2026 16:32:54 +0100
 Subject: [PATCH 1/3] site-enum-permissive: replace 3 site (str, Enum) classes
  with permissive str aliases
@@ -45,7 +45,7 @@ index f28df5a..2c024ef 100644
 -    SYD = "SYD"
 -    TYO = "TYO"
 -    TYO2 = "TYO2"
-+# edge-provider-sdk patch: original Latitude site slugs preserved for strict
++# edge-python-sdk patch: original Latitude site slugs preserved for strict
 +# validation when provider="latitude". Permissive alias below accepts any string
 +# so digital-frontier and other Latitude-shaped providers can supply their own.
 +_ORIGINAL_SITES = (
@@ -85,7 +85,7 @@ index 5020d0a..e9d009d 100644
 -    SYD = "SYD"
 -    TYO = "TYO"
 -    TYO2 = "TYO2"
-+# edge-provider-sdk patch: permissive alias — accepts any string. Canonical
++# edge-python-sdk patch: permissive alias — accepts any string. Canonical
 +# Latitude site list lives in models.create_serverop._ORIGINAL_SITES.
 +CreateVirtualNetworkPrivateNetworksSite = str
  
@@ -118,7 +118,7 @@ index 5b404d3..918eedb 100644
 -    SYD = "SYD"
 -    TYO = "TYO"
 -    TYO2 = "TYO2"
-+# edge-provider-sdk patch: permissive alias — accepts any string. Canonical
++# edge-python-sdk patch: permissive alias — accepts any string. Canonical
 +# Latitude site list lives in models.create_serverop._ORIGINAL_SITES.
 +PostVpnSessionVpnSessionsSite = str
  

@@ -11,7 +11,7 @@ from collections.abc import Iterator
 import pytest
 import respx
 
-from edge_provider_sdk import EdgeClient
+from edge_python_sdk import EdgeClient
 
 LATITUDE_BASE_URL = "https://api.latitude.sh"
 DF_BASE_URL = "https://df.test/api/v1"

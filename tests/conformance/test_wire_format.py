@@ -16,7 +16,7 @@ from typing import Any
 import httpx
 import respx
 
-from edge_provider_sdk import EdgeClient
+from edge_python_sdk import EdgeClient
 
 # The Latitude SDK only treats a response as a successful payload if it
 # arrives with the JSON:API content type. Plain `application/json` is

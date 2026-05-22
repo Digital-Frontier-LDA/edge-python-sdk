@@ -5,13 +5,13 @@
 ## Install
 
 ```bash
-pip install edge-provider-sdk
+pip install edge-python-sdk
 ```
 
 ## Latitude direct
 
 ```python
-from edge_provider_sdk import EdgeClient
+from edge_python_sdk import EdgeClient
 
 client = EdgeClient(provider="latitude", bearer="lt_...")
 ```

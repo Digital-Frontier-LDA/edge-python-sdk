@@ -1,4 +1,4 @@
-# edge-provider-sdk — v0.1 Specification
+# edge-python-sdk — v0.1 Specification
 
 > Status: **DRAFT**. Living design document. Sign-off triggers v0.1 scaffolding.
 > Inspiration: LiteLLM (1 API, N providers) adapted for stateful bare-metal compute.
@@ -7,7 +7,7 @@
 
 ## 1. Purpose & scope
 
-`edge-provider-sdk` is a public PyPI package providing a single Python client for
+`edge-python-sdk` is a public PyPI package providing a single Python client for
 multiple Latitude-shaped compute providers. It wraps the upstream
 `latitudesh-python-sdk` (a Speakeasy-generated SDK by latitudeshdev), removes
 client-side strict-enum validation for catalog fields, and selects a backend
@@ -38,7 +38,7 @@ These belong in v0.2+ once v0.1 is stable on PyPI.
 ### 2.1 Constructor
 
 ```python
-from edge_provider_sdk import EdgeClient
+from edge_python_sdk import EdgeClient
 
 # Latitude direct (strict enums enforced where upstream enforces them)
 client = EdgeClient(provider="latitude", bearer="lt_...")
@@ -93,7 +93,7 @@ Results are cached for the lifetime of the `EdgeClient` instance — no TTL in v
 
 ## 3. Provider contract
 
-A provider is identified by a string registered in `edge_provider_sdk.providers`.
+A provider is identified by a string registered in `edge_python_sdk.providers`.
 v0.1 ships two:
 
 | `provider=` | Default `base_url` | Enum behavior | Catalog source for sites |
@@ -107,7 +107,7 @@ client to network round-trip with no benefit. We keep upstream behavior to be a
 faithful passthrough.
 
 **Permissive vs strict implementation:** the patched SDK lives in
-`src/edge_provider_sdk/_generated/` (gitignored, built from `patches/`). Permissive
+`src/edge_python_sdk/_generated/` (gitignored, built from `patches/`). Permissive
 versions replace the seven `(str, Enum)` classes with type aliases:
 
 ```python
@@ -158,16 +158,16 @@ upstream tarball (pip download)
  scripts/apply-patches.sh
         │  (extract, apply 3 patches, rewrite import path)
         ▼
- src/edge_provider_sdk/_generated/   (gitignored)
+ src/edge_python_sdk/_generated/   (gitignored)
         │
         ▼  imported by
- src/edge_provider_sdk/client.py     (EdgeClient wrapper)
+ src/edge_python_sdk/client.py     (EdgeClient wrapper)
 ```
 
 **Why rewrite the import path:** to avoid collision when both `latitudesh-python-sdk`
-and `edge-provider-sdk` are installed in the same environment, the patched module
-is namespaced as `edge_provider_sdk._generated` internally, and re-exported only
-through `EdgeClient` and `edge_provider_sdk.models`.
+and `edge-python-sdk` are installed in the same environment, the patched module
+is namespaced as `edge_python_sdk._generated` internally, and re-exported only
+through `EdgeClient` and `edge_python_sdk.models`.
 
 **Build script:** `scripts/apply-patches.sh` is idempotent. It pins the upstream
 version, downloads via `pip download --no-deps --no-binary=:all:`, applies the
@@ -178,7 +178,7 @@ patches, and rewrites imports. CI runs it on every push.
 ## 6. Versioning policy
 
 **Decided 2026-05-13 by quorum (codex-1, gemini-1 unanimous; see
-`.planning/quorum/debates/2026-05-13-edge-provider-sdk-version-scheme.md`).**
+`.planning/quorum/debates/2026-05-13-edge-python-sdk-version-scheme.md`).**
 
 - Public API follows **independent wrapper semver** — fully decoupled from
   upstream cadence.
@@ -186,17 +186,17 @@ patches, and rewrites imports. CI runs it on every push.
 - Upstream version recorded in package metadata, **not** in the version string:
   ```toml
   [project]
-  name = "edge-provider-sdk"
+  name = "edge-python-sdk"
   version = "0.1.0"
 
-  [tool.edge-provider-sdk]
+  [tool.edge-python-sdk]
   upstream-package = "latitudesh-python-sdk"
   upstream-version = "3.0.5"
   ```
 - Runtime accessors:
   ```python
-  edge_provider_sdk.__version__         # "0.1.0"
-  edge_provider_sdk.upstream_version    # "3.0.5"
+  edge_python_sdk.__version__         # "0.1.0"
+  edge_python_sdk.upstream_version    # "3.0.5"
   ```
 - README states the wrapped upstream version prominently.
 - **Breaking changes** to `EdgeClient` trigger wrapper major bumps (`1.0.0` → `2.0.0`),
@@ -209,7 +209,7 @@ patches, and rewrites imports. CI runs it on every push.
 |---|---|
 | `3.0.5+ep1` (PEP 440 local version) | PyPI Warehouse rejects local-version segments on public uploads (PEP 440). Dead on arrival. |
 | `3.0.5.post1` (PEP 440 post-release) | Misuses `.postN` — PEP 440 reserves it for trivial post-release corrections, not feature-additive wrapper iterations. Misrepresents the wrapper as a post-release of upstream Latitude. |
-| `edge-provider-sdk-3` v `0.1.0` (hybrid name) | Package-name churn per upstream major hurts `pip install edge-provider-sdk` discoverability. Only pays off if simultaneous parallel installs across upstream majors become a real requirement — not for v0.1. |
+| `edge-python-sdk-3` v `0.1.0` (hybrid name) | Package-name churn per upstream major hurts `pip install edge-python-sdk` discoverability. Only pays off if simultaneous parallel installs across upstream majors become a real requirement — not for v0.1. |
 
 This pattern matches `mypy-extensions` (wraps mypy), `pytest-asyncio` (wraps pytest), and the broader wrapper-library ecosystem on PyPI.
 
@@ -241,14 +241,14 @@ Three GitHub Actions workflows:
 ### `.github/workflows/release.yml`
 - Trigger: GitHub release published from a `v*` tag
 - Steps: build wheel + sdist → publish to PyPI via OIDC trusted publishing
-- PyPI project: `edge-provider-sdk` — Trusted Publisher configured to this repo
+- PyPI project: `edge-python-sdk` — Trusted Publisher configured to this repo
 
 ---
 
 ## 8. Repository layout
 
 ```
-edge-provider-sdk/
+edge-python-sdk/
 ├── .github/
 │   └── workflows/
 │       ├── ci.yml
@@ -266,7 +266,7 @@ edge-provider-sdk/
 │   ├── apply-patches.sh
 │   └── refresh-upstream.sh
 ├── src/
-│   └── edge_provider_sdk/
+│   └── edge_python_sdk/
 │       ├── __init__.py
 │       ├── client.py
 │       ├── providers.py
@@ -333,9 +333,9 @@ README points at all three.
 These need answers **before** v0.1 ships, but **not** before scaffolding starts:
 
 1. **~~PEP 440 version scheme.~~** ✅ RESOLVED 2026-05-13 — wrapper semver `0.1.0`
-   (independent of upstream), upstream version in `[tool.edge-provider-sdk]`
+   (independent of upstream), upstream version in `[tool.edge-python-sdk]`
    metadata. See §6 and quorum debate
-   `.planning/quorum/debates/2026-05-13-edge-provider-sdk-version-scheme.md`.
+   `.planning/quorum/debates/2026-05-13-edge-python-sdk-version-scheme.md`.
 
 2. **License.** Apache-2.0 matches upstream, but does upstream's NOTICE need
    attribution? Need to audit upstream license headers.

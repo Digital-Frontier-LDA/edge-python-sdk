@@ -67,7 +67,7 @@ jobs:
           set -euo pipefail
           ls -la dist/
           # Sanity-check the wheel actually includes the patched _generated/ tree.
-          generated_count="$(unzip -l dist/*.whl | grep -c 'edge_provider_sdk/_generated/' || true)"
+          generated_count="$(unzip -l dist/*.whl | grep -c 'edge_python_sdk/_generated/' || true)"
           if [[ "${generated_count}" -lt 100 ]]; then
             echo "::error::Wheel only contains ${generated_count} _generated/ files — expected ≥100"
             exit 1
@@ -93,7 +93,7 @@ jobs:
     timeout-minutes: 5
     environment:
       name: testpypi
-      url: https://test.pypi.org/project/edge-provider-sdk/
+      url: https://test.pypi.org/project/edge-python-sdk/
     permissions:
       id-token: write  # OIDC for trusted publishing
     steps:
@@ -115,7 +115,7 @@ jobs:
     timeout-minutes: 5
     environment:
       name: pypi
-      url: https://pypi.org/project/edge-provider-sdk/
+      url: https://pypi.org/project/edge-python-sdk/
     permissions:
       id-token: write
     steps:
