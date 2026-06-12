@@ -1,0 +1,34 @@
+name: Feature request
+description: Suggest a new capability or improvement.
+title: "[feat]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: Describe the use case — what are you trying to do that's hard today?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: How would you like this to work? Code snippets showing the desired API are very welcome.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Other approaches you've thought about and why they don't fit.
+
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope check
+      options:
+        - label: This belongs in the wrapper, not in upstream `latitudesh-python-sdk`.
+          required: true

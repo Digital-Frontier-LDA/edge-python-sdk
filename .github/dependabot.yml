@@ -1,0 +1,36 @@
+version: 2
+updates:
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    groups:
+      dev-deps:
+        patterns:
+          - "ruff"
+          - "mypy"
+          - "pytest*"
+          - "respx"
+        update-types:
+          - "minor"
+          - "patch"
+      runtime-deps:
+        patterns:
+          - "httpx"
+          - "pydantic"
+        update-types:
+          - "patch"
+    # latitudesh-python-sdk is managed by sync-upstream.yml — that workflow
+    # co-bumps the pin and the patches together, so Dependabot would race
+    # with it and open noisy PRs that can't merge cleanly.
+    ignore:
+      - dependency-name: "latitudesh-python-sdk"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5

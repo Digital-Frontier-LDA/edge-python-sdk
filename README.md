@@ -1,5 +1,10 @@
 # edge-python-sdk
 
+[![CI](https://github.com/Digital-Frontier-LDA/edge-python-sdk/actions/workflows/ci.yml/badge.svg)](https://github.com/Digital-Frontier-LDA/edge-python-sdk/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/edge-python-sdk.svg)](https://pypi.org/project/edge-python-sdk/)
+[![Python versions](https://img.shields.io/pypi/pyversions/edge-python-sdk.svg)](https://pypi.org/project/edge-python-sdk/)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](./LICENSE)
+
 > **Status: released — `0.1.1` (alpha).** The wrapper, the three permissive-enum
 > patches, and the conformance suite are implemented; the public API is frozen
 > per [`SPEC.md`](./SPEC.md). Installable from
@@ -74,6 +79,25 @@ client.catalog.os()      # list[str]
 ```
 
 See [`docs/quickstart.md`](./docs/quickstart.md) for a full walkthrough.
+
+## Provider behavior differences
+
+`edge-python-sdk` gives you one API across providers — but the providers are not
+identical infrastructure. A few response fields keep the same Latitude name and
+JSON type, yet carry a value whose **nature differs** by provider. Anything not
+listed here behaves identically across providers.
+
+| Field | `provider="latitude"` (bare metal) | `provider="digital-frontier"` (Akash-backed) |
+|---|---|---|
+| `primary_ipv4` | A literal public IPv4, e.g. `203.0.113.7`. | A provider **gateway hostname**, e.g. `provider.m3a.eu-n-3.example.network` — an Akash deployment is reached through a provider gateway, not a dedicated inbound IP. |
+| `primary_port` | The service's own listening port. | A **provider-assigned forwarded port**, e.g. `30713`, mapping to the container's internal port. |
+
+Treat `primary_ipv4:primary_port` as an opaque `host:port` pair — never assume
+`primary_ipv4` is an IP literal, or that `primary_port` is the port your service
+declared. The `digital-frontier` adapter keeps the Latitude field names for
+drop-in compatibility; the authoritative registry of divergences lives in the
+adapter repo at
+[`docs/provider-behavior.md`](https://github.com/Digital-Frontier-LDA/latitude-api-adapter/blob/main/docs/provider-behavior.md).
 
 ## Upstream version
 

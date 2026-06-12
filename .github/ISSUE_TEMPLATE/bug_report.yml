@@ -1,0 +1,65 @@
+name: Bug report
+description: Something in edge-python-sdk doesn't work the way it should.
+title: "[bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. Before filing, please confirm:
+        - The issue is in `src/edge_python_sdk/` (our wrapper code), **not** in
+          `_generated/`. Bugs that exist in unpatched upstream code belong at
+          [latitudesh-python-sdk](https://github.com/latitudesh/latitudesh-python-sdk/issues).
+        - You've reproduced against the latest released version.
+
+  - type: input
+    id: version
+    attributes:
+      label: edge-python-sdk version
+      description: 'From `pip show edge-python-sdk` or `python -c "import edge_python_sdk; print(edge_python_sdk.__version__)"`.'
+      placeholder: e.g. 0.1.1
+    validations:
+      required: true
+
+  - type: input
+    id: python-version
+    attributes:
+      label: Python version
+      placeholder: e.g. 3.12.4
+    validations:
+      required: true
+
+  - type: dropdown
+    id: provider
+    attributes:
+      label: Which provider were you using?
+      options:
+        - latitude
+        - digital-frontier
+        - other / custom adapter
+        - N/A — bug doesn't depend on provider
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you expect, and what did you observe?
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Minimal reproduction
+      description: A short code snippet or command that reproduces the issue.
+      render: python
+    validations:
+      required: true
+
+  - type: textarea
+    id: traceback
+    attributes:
+      label: Full traceback (if applicable)
+      render: text
