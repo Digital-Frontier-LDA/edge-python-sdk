@@ -10,6 +10,45 @@ see [`SPEC.md` §6](./SPEC.md#6-versioning-policy).
 
 ## [Unreleased]
 
+## [0.1.2] — 2026-06-12
+
+First release of the renamed `edge-python-sdk` package on PyPI. The legacy
+`edge-provider-sdk` 0.1.1 release remains orphaned upstream (PyPI does not
+support project renames); consumers must switch to `pip install edge-python-sdk`
+and `import edge_python_sdk`.
+
+### Changed
+- **BREAKING (distribution rename).** `edge-provider-sdk` → `edge-python-sdk`,
+  and the import path `edge_provider_sdk` → `edge_python_sdk`. Repository,
+  package directory, distribution name, scripts, CI, and docs all renamed
+  together.
+
+### Added
+- `src/edge_python_sdk/py.typed` — PEP 561 marker so downstream `mypy` treats
+  the wrapper package as typed. The pre-existing marker under `_generated/`
+  is upstream's and didn't cover the top-level package.
+- Secret scanning in CI via gitleaks (`secrets-gitleaks` job + `.gitleaks.toml`,
+  binary pinned to 8.30.1 with checksum-verified install; default ruleset +
+  allowlists for SHA-pinned actions and release-asset checksums).
+- `SECURITY.md` routing disclosure through GitHub Security Advisories.
+- `CONTRIBUTING.md` covering dev setup, the patch workflow, and PR expectations.
+- Issue and PR templates; blank issues disabled; security and upstream-bug
+  reports routed via contact links.
+- `.github/dependabot.yml` for weekly grouped `pip` updates (dev / runtime) and
+  GitHub Actions updates. `latitudesh-python-sdk` is excluded because
+  `sync-upstream.yml` already owns its lifecycle.
+- README badges: CI status, PyPI version, supported Python versions, license.
+
+### Fixed
+- **Upstream MIT-attribution compliance.** `scripts/apply-patches.sh` now copies
+  upstream's `LICENSE` into
+  `src/edge_python_sdk/_generated/THIRD-PARTY-LICENSES/latitudesh-python-sdk-LICENSE`,
+  and the wheel ships it alongside the vendored patched code. Previously the
+  wheel shipped patched MIT-licensed code with no attribution notice — closes
+  the open compliance item that
+  [`docs/comparison-with-upstream.md`](./docs/comparison-with-upstream.md#licensing--attribution)
+  had previously flagged.
+
 ## [0.1.2a1] — 2026-06-12
 
 First TestPyPI pre-release of the renamed `edge-python-sdk` package. Same code
