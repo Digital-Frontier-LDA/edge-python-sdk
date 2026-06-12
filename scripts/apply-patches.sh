@@ -104,7 +104,16 @@ rm -rf "${TARGET_DIR}"
 mkdir -p "${TARGET_PARENT}"
 mv "${PATCHED_SRC}" "${TARGET_DIR}"
 
-# 6. Record provenance — useful for `python -m edge_python_sdk._generated --version`
+# 6. Preserve upstream's MIT license alongside the vendored code. MIT requires
+# the notice to travel with redistributions — without this the wheel ships
+# patched MIT-licensed code with no attribution attached. The wheel's hatch
+# config already includes `_generated/**` as artifacts, so this file ships;
+# sdist consumers re-run this script and so get the same file.
+# See docs/comparison-with-upstream.md §"Licensing & attribution".
+mkdir -p "${TARGET_DIR}/THIRD-PARTY-LICENSES"
+cp "${UPSTREAM_TREE}/LICENSE" "${TARGET_DIR}/THIRD-PARTY-LICENSES/latitudesh-python-sdk-LICENSE"
+
+# 7. Record provenance — useful for `python -m edge_python_sdk._generated --version`
 # style debugging and for sync-upstream.yml to confirm the build matches the pin.
 cat >"${TARGET_DIR}/_provenance.py" <<EOF
 """Build provenance — written by scripts/apply-patches.sh. Do not edit by hand."""
