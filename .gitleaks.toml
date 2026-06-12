@@ -1,0 +1,13 @@
+title = "Gitleaks config — edge-python-sdk"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Known-safe patterns"
+regexes = [
+  # GitHub Actions commit-SHA pins (40 hex chars in `uses: org/repo@<sha>`)
+  '''^[a-f0-9]{40}$''',
+  # SHA-256 release-asset checksums (e.g. entries in gitleaks_*_checksums.txt)
+  '''^[a-f0-9]{64}$''',
+]

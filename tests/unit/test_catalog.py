@@ -12,7 +12,7 @@ from typing import Any
 
 import pytest
 
-from edge_provider_sdk.catalog import Catalog
+from edge_python_sdk.catalog import Catalog
 
 
 @dataclass

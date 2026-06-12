@@ -10,10 +10,10 @@ from __future__ import annotations
 
 import pytest
 
-from edge_provider_sdk._generated.models.create_server_reinstallop import (
+from edge_python_sdk._generated.models.create_server_reinstallop import (
     CreateServerReinstallServersOperatingSystem,
 )
-from edge_provider_sdk._generated.models.create_serverop import (
+from edge_python_sdk._generated.models.create_serverop import (
     _ORIGINAL_OS,
     _ORIGINAL_PLANS,
     _ORIGINAL_SITES,
@@ -22,13 +22,13 @@ from edge_provider_sdk._generated.models.create_serverop import (
     CreateServerServersPlan,
     CreateServerServersSite,
 )
-from edge_provider_sdk._generated.models.create_virtual_networkop import (
+from edge_python_sdk._generated.models.create_virtual_networkop import (
     CreateVirtualNetworkPrivateNetworksSite,
 )
-from edge_provider_sdk._generated.models.post_vpn_sessionop import (
+from edge_python_sdk._generated.models.post_vpn_sessionop import (
     PostVpnSessionVpnSessionsSite,
 )
-from edge_provider_sdk._generated.models.update_server_deploy_configop import (
+from edge_python_sdk._generated.models.update_server_deploy_configop import (
     UpdateServerDeployConfigServersOperatingSystem,
 )
 

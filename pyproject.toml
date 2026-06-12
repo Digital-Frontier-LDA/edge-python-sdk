@@ -3,13 +3,13 @@ requires = ["hatchling>=1.27"]
 build-backend = "hatchling.build"
 
 [project]
-name = "edge-provider-sdk"
+name = "edge-python-sdk"
 version = "0.1.1"
 description = "Single Python client for Latitude-shaped compute providers — wraps latitudesh-python-sdk with permissive catalog enums."
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.10"
-authors = [{ name = "edge-provider-sdk contributors" }]
+authors = [{ name = "edge-python-sdk contributors" }]
 keywords = ["latitude", "bare-metal", "compute", "sdk", "digital-frontier", "akash"]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -39,24 +39,24 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/Digital-Frontier-LDA/edge-provider-sdk"
-Issues = "https://github.com/Digital-Frontier-LDA/edge-provider-sdk/issues"
-Changelog = "https://github.com/Digital-Frontier-LDA/edge-provider-sdk/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/Digital-Frontier-LDA/edge-python-sdk"
+Issues = "https://github.com/Digital-Frontier-LDA/edge-python-sdk/issues"
+Changelog = "https://github.com/Digital-Frontier-LDA/edge-python-sdk/blob/main/CHANGELOG.md"
 
-[tool.edge-provider-sdk]
+[tool.edge-python-sdk]
 upstream-package = "latitudesh-python-sdk"
 upstream-version = "3.0.5"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/edge_provider_sdk"]
+packages = ["src/edge_python_sdk"]
 # `_generated/` is gitignored (it's built from patches/, not authored), so by
 # default hatch's gitignore-aware file selector would drop it from the wheel.
 # `artifacts` overrides that — the patched SDK *is* what wheel consumers need.
-artifacts = ["src/edge_provider_sdk/_generated/**"]
+artifacts = ["src/edge_python_sdk/_generated/**"]
 
 [tool.hatch.build.targets.sdist]
 include = [
-    "src/edge_provider_sdk",
+    "src/edge_python_sdk",
     "patches",
     "scripts",
     "docs",
@@ -68,7 +68,7 @@ include = [
 ]
 # The sdist ships only the *recipe* — patches + apply-patches.sh — so any
 # rebuild from sdist regenerates `_generated/` against the pinned upstream.
-exclude = ["src/edge_provider_sdk/_generated/**"]
+exclude = ["src/edge_python_sdk/_generated/**"]
 
 [tool.ruff]
 line-length = 100
@@ -79,15 +79,15 @@ select = ["E", "F", "I", "UP", "B", "SIM"]
 ignore = ["E501"]
 
 [tool.ruff.lint.per-file-ignores]
-"src/edge_provider_sdk/_generated/**" = ["ALL"]
+"src/edge_python_sdk/_generated/**" = ["ALL"]
 
 [tool.mypy]
 python_version = "3.10"
 strict = true
-exclude = ["src/edge_provider_sdk/_generated/"]
+exclude = ["src/edge_python_sdk/_generated/"]
 
 [[tool.mypy.overrides]]
-module = "edge_provider_sdk._generated.*"
+module = "edge_python_sdk._generated.*"
 ignore_errors = true
 follow_imports = "skip"
 

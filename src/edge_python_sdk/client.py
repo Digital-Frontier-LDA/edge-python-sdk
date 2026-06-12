@@ -5,7 +5,7 @@ See SPEC.md §2 (Public API surface) and §3 (Provider contract).
 For `provider="latitude"`, EdgeClient instantiates the unpatched upstream
 `latitudesh_python_sdk.Latitudesh` directly — strict enums and faithful
 upstream behavior. For `provider="digital-frontier"`, it instantiates the
-patched `edge_provider_sdk._generated.Latitudesh` so any region/plan/OS
+patched `edge_python_sdk._generated.Latitudesh` so any region/plan/OS
 string passes through. The two SDKs coexist because they live under
 different module names (see `scripts/apply-patches.sh`).
 
@@ -87,8 +87,8 @@ def _load_provider_backend(provider: ProviderName) -> tuple[type, tuple[str, ...
         return _UpstreamSdk, tuple(m.value for m in _OriginalSiteEnum)
 
     if provider == "digital-frontier":
-        from edge_provider_sdk._generated import Latitudesh as _PatchedSdk
-        from edge_provider_sdk._generated.models.create_serverop import (
+        from edge_python_sdk._generated import Latitudesh as _PatchedSdk
+        from edge_python_sdk._generated.models.create_serverop import (
             _ORIGINAL_SITES,
         )
 

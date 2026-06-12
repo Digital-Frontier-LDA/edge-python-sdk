@@ -1,5 +1,5 @@
 # Build artifacts from scripts/apply-patches.sh
-src/edge_provider_sdk/_generated/
+src/edge_python_sdk/_generated/
 .upstream-cache/
 
 # Python

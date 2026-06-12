@@ -1,5 +1,5 @@
 From 087103b6875acce815ba2683500a21e83dbc8281 Mon Sep 17 00:00:00 2001
-From: edge-provider-sdk <edge-provider-sdk@example.com>
+From: edge-python-sdk <edge-python-sdk@example.com>
 Date: Wed, 13 May 2026 16:33:08 +0100
 Subject: [PATCH 2/3] plan-enum-permissive: replace CreateServerServersPlan
  (str, Enum) with permissive str alias
@@ -44,7 +44,7 @@ index 2c024ef..138ba36 100644
 -    RS4_METAL_XLARGE = "rs4-metal-xlarge"
 -    S2_SMALL_X86 = "s2-small-x86"
 -    S3_LARGE_X86 = "s3-large-x86"
-+# edge-provider-sdk patch: original Latitude plan slugs preserved for strict
++# edge-python-sdk patch: original Latitude plan slugs preserved for strict
 +# validation when provider="latitude". Permissive alias below accepts any string.
 +_ORIGINAL_PLANS = (
 +    "c2-large-x86", "c2-medium-x86", "c2-small-x86",
@@ -58,4 +58,4 @@ index 2c024ef..138ba36 100644
 +CreateServerServersPlan = str
  
  
- # edge-provider-sdk patch: original Latitude site slugs preserved for strict
+ # edge-python-sdk patch: original Latitude site slugs preserved for strict

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/Digital-Frontier-LDA/edge-python-sdk/security/advisories/new
+    about: Report security issues privately via GitHub Security Advisories.
+  - name: Upstream SDK bug
+    url: https://github.com/latitudesh/latitudesh-python-sdk/issues
+    about: Bugs in unpatched code under `_generated/` belong upstream.

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import pytest
 
-from edge_provider_sdk import EdgeClient
+from edge_python_sdk import EdgeClient
 
 
 def test_latitude_construction() -> None:
@@ -31,7 +31,7 @@ def test_digital_frontier_construction() -> None:
 
     assert client.provider == "digital-frontier"
     # DF uses the patched _generated/ tree so all 7 enums are permissive.
-    assert type(client._sdk).__module__.startswith("edge_provider_sdk._generated")
+    assert type(client._sdk).__module__.startswith("edge_python_sdk._generated")
     assert client.servers is client._sdk.servers
 
 
@@ -84,7 +84,7 @@ def test_catalog_static_sites_do_not_drift_between_sdks() -> None:
         CreateServerServersSite as UpstreamSiteEnum,
     )
 
-    from edge_provider_sdk._generated.models.create_serverop import _ORIGINAL_SITES
+    from edge_python_sdk._generated.models.create_serverop import _ORIGINAL_SITES
 
     upstream_values = tuple(m.value for m in UpstreamSiteEnum)
     assert tuple(_ORIGINAL_SITES) == upstream_values

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# apply-patches.sh — build src/edge_provider_sdk/_generated/ from pinned upstream + patches/.
+# apply-patches.sh — build src/edge_python_sdk/_generated/ from pinned upstream + patches/.
 #
 # Idempotent. Reads the upstream version from pyproject.toml, downloads the
 # sdist from PyPI's JSON API, applies patches in numeric order, then rewrites
-# `latitudesh_python_sdk` import paths to `edge_provider_sdk._generated`.
+# `latitudesh_python_sdk` import paths to `edge_python_sdk._generated`.
 
 set -euo pipefail
 
@@ -12,15 +12,15 @@ UPSTREAM_DIST_NAME="latitudesh_python_sdk"  # PEP 503 normalized name (dashes→
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CACHE_DIR="${ROOT}/.upstream-cache"
-TARGET_PARENT="${ROOT}/src/edge_provider_sdk"
+TARGET_PARENT="${ROOT}/src/edge_python_sdk"
 TARGET_DIR="${TARGET_PARENT}/_generated"
 PATCHES_DIR="${ROOT}/patches"
 
-# Extract pinned upstream version from pyproject.toml: the [tool.edge-provider-sdk]
+# Extract pinned upstream version from pyproject.toml: the [tool.edge-python-sdk]
 # upstream-version field is the authoritative pin.
 UPSTREAM_VERSION="$(
   awk '
-    /^\[tool\.edge-provider-sdk\]/ { in_section = 1; next }
+    /^\[tool\.edge-python-sdk\]/ { in_section = 1; next }
     /^\[/ { in_section = 0 }
     in_section && /^upstream-version[[:space:]]*=/ {
       gsub(/.*=[[:space:]]*"|"[[:space:]]*$/, "")
@@ -31,7 +31,7 @@ UPSTREAM_VERSION="$(
 )"
 
 if [[ -z "${UPSTREAM_VERSION}" ]]; then
-  echo "ERROR: could not read [tool.edge-provider-sdk].upstream-version from pyproject.toml" >&2
+  echo "ERROR: could not read [tool.edge-python-sdk].upstream-version from pyproject.toml" >&2
   exit 1
 fi
 
@@ -62,7 +62,7 @@ fi
 # pyproject.toml — leaving it inside our repo confuses uv's workspace
 # discovery into trying to build it as a sub-package. The tarball stays
 # cached in .upstream-cache/ so repeated runs don't re-download.
-EXTRACT_DIR="$(mktemp -d -t edge-provider-sdk-extract-XXXXXX)"
+EXTRACT_DIR="$(mktemp -d -t edge-python-sdk-extract-XXXXXX)"
 trap 'rm -rf "${EXTRACT_DIR}"' EXIT
 tar -xzf "${TARBALL}" -C "${EXTRACT_DIR}"
 
@@ -89,14 +89,14 @@ for patch in $(printf '%s\n' "${PATCHES[@]}" | sort); do
   ( cd "${UPSTREAM_TREE}" && patch -p1 --silent --no-backup-if-mismatch -i "${patch}" )
 done
 
-# 4. Rewrite imports: `latitudesh_python_sdk` → `edge_provider_sdk._generated`.
+# 4. Rewrite imports: `latitudesh_python_sdk` → `edge_python_sdk._generated`.
 # We rewrite the package name everywhere it appears in source files; that
 # covers `from latitudesh_python_sdk...`, `import latitudesh_python_sdk...`,
 # and stringified references (e.g. forward-ref annotations).
 echo "==> rewriting imports"
 PATCHED_SRC="${UPSTREAM_TREE}/src/${UPSTREAM_DIST_NAME}"
 find "${PATCHED_SRC}" -type f -name "*.py" -print0 \
-  | xargs -0 perl -i -pe 's/\blatitudesh_python_sdk\b/edge_provider_sdk._generated/g'
+  | xargs -0 perl -i -pe 's/\blatitudesh_python_sdk\b/edge_python_sdk._generated/g'
 
 # 5. Move to _generated/. Replace any prior build atomically.
 echo "==> installing into ${TARGET_DIR}"
@@ -104,7 +104,16 @@ rm -rf "${TARGET_DIR}"
 mkdir -p "${TARGET_PARENT}"
 mv "${PATCHED_SRC}" "${TARGET_DIR}"
 
-# 6. Record provenance — useful for `python -m edge_provider_sdk._generated --version`
+# 6. Preserve upstream's MIT license alongside the vendored code. MIT requires
+# the notice to travel with redistributions — without this the wheel ships
+# patched MIT-licensed code with no attribution attached. The wheel's hatch
+# config already includes `_generated/**` as artifacts, so this file ships;
+# sdist consumers re-run this script and so get the same file.
+# See docs/comparison-with-upstream.md §"Licensing & attribution".
+mkdir -p "${TARGET_DIR}/THIRD-PARTY-LICENSES"
+cp "${UPSTREAM_TREE}/LICENSE" "${TARGET_DIR}/THIRD-PARTY-LICENSES/latitudesh-python-sdk-LICENSE"
+
+# 7. Record provenance — useful for `python -m edge_python_sdk._generated --version`
 # style debugging and for sync-upstream.yml to confirm the build matches the pin.
 cat >"${TARGET_DIR}/_provenance.py" <<EOF
 """Build provenance — written by scripts/apply-patches.sh. Do not edit by hand."""

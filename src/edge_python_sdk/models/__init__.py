@@ -14,7 +14,7 @@ from typing import Any
 
 
 def _generated() -> Any:
-    return import_module("edge_provider_sdk._generated.models")
+    return import_module("edge_python_sdk._generated.models")
 
 
 def __getattr__(name: str) -> Any:

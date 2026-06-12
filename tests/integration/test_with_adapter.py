@@ -25,7 +25,7 @@ import uuid
 
 import pytest
 
-from edge_provider_sdk import EdgeClient
+from edge_python_sdk import EdgeClient
 
 INTEGRATION_GATE = os.environ.get("EDGE_PROVIDER_INTEGRATION") == "1"
 ADAPTER_URL = os.environ.get("EDGE_PROVIDER_ADAPTER_URL", "")
