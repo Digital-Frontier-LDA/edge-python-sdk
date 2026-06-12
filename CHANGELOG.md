@@ -10,6 +10,13 @@ see [`SPEC.md` §6](./SPEC.md#6-versioning-policy).
 
 ## [Unreleased]
 
+## [0.1.2a1] — 2026-06-12
+
+First TestPyPI pre-release of the renamed `edge-python-sdk` package. Same code
+as the forthcoming `0.1.2`; only the version string differs. Validates the
+fresh trusted-publisher configuration on TestPyPI under the new distribution
+name before burning the `0.1.2` slot on real PyPI.
+
 ## [0.1.1] — 2026-05-14
 
 ### Fixed
