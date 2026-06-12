@@ -5,7 +5,7 @@
 [![Python versions](https://img.shields.io/pypi/pyversions/edge-python-sdk.svg)](https://pypi.org/project/edge-python-sdk/)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](./LICENSE)
 
-> **Status: released — `0.1.1` (alpha).** The wrapper, the three permissive-enum
+> **Status: released — `0.1.2` (alpha).** The wrapper, the three permissive-enum
 > patches, and the conformance suite are implemented; the public API is frozen
 > per [`SPEC.md`](./SPEC.md). Installable from
 > [PyPI](https://pypi.org/project/edge-python-sdk/).
@@ -106,7 +106,7 @@ independent of upstream — see [`SPEC.md` §6](./SPEC.md#6-versioning-policy).
 
 ```python
 import edge_python_sdk
-edge_python_sdk.__version__         # "0.1.1"
+edge_python_sdk.__version__         # "0.1.2"
 edge_python_sdk.upstream_version    # "3.0.5"
 ```
 
