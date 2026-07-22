@@ -50,9 +50,16 @@ jobs:
         id: existing
         env:
           GH_TOKEN: ${{ github.token }}
+          # Via env, NEVER interpolated into the script body. `to_version` originates
+          # OUTSIDE this repo — scripts/refresh-upstream.sh reads it from the upstream
+          # release feed — so a version string carrying shell metacharacters would be
+          # executed by the runner if it were pasted into the `run:` text (CWE-78).
+          # `${{ }}` substitution happens before bash ever sees the script; `${VAR}`
+          # expansion happens inside bash, where the value stays a value.
+          TO_VERSION: ${{ steps.drift.outputs.to_version }}
         run: |
           set -euo pipefail
-          branch="sync/upstream-${{ steps.drift.outputs.to_version }}"
+          branch="sync/upstream-${TO_VERSION}"
           echo "branch=${branch}" >> "$GITHUB_OUTPUT"
           if gh pr list --state open --head "${branch}" --json number | grep -q '"number"'; then
             echo "PR for ${branch} already open — skipping."
@@ -72,7 +79,7 @@ jobs:
             # only copy of a bump someone still wants, and this workflow has no mandate to
             # destroy refs. Fail with the cause and the exact remedy instead.
             echo "::error title=Orphan sync branch blocks this run::${branch} already exists on origin but has no open PR. This run cannot push and will fail. Cause is almost certainly that 'Allow GitHub Actions to create and approve pull requests' is disabled for this org, so a previous run pushed the branch and then could not open the PR."
-            echo "::error::Remedy — open the PR by hand for the existing branch:  gh pr create --head ${branch} --title 'sync: bump upstream to ${{ steps.drift.outputs.to_version }}' --fill"
+            echo "::error::Remedy — open the PR by hand for the existing branch:  gh pr create --head ${branch} --title 'sync: bump upstream to ${TO_VERSION}' --fill"
             echo "::error::Or, if the branch is stale and unwanted:  git push origin --delete ${branch}"
             echo "::error::Tracking: see the repo issue 'upstream sync has been dead since 2026-07-03'."
             exit 1
@@ -125,7 +132,12 @@ jobs:
         id: tests
         run: |
           set +e
+          # `uv sync` gets its own status. Capturing only the pytest pipeline would leave
+          # a second silently-discarded exit code in the very step that exists to stop
+          # silently discarding exit codes: a failed sync means the environment is broken,
+          # and a pytest run against a broken environment proves nothing about upstream.
           uv sync --all-extras
+          sync_rc=$?
           uv run pytest -q 2>&1 | tee test-log.txt
           # ${PIPESTATUS[0]}, NOT $? — see the identical note in the patch step above.
           # PROVEN on run 29561935235 (2026-07-17): pytest died at collection with
@@ -133,7 +145,16 @@ jobs:
           # ("1 error in 0.13s"), this step still concluded `success`, and the workflow
           # took the CLEAN-BUMP path — whose PR body states "Full test suite passed
           # locally in CI". Both failure paths were `skipped`.
-          echo "exit_code=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
+          pytest_rc=${PIPESTATUS[0]}
+          # Either failure disqualifies the clean-bump path. Report the sync failure in
+          # preference, since a broken environment explains a pytest result but not the
+          # other way round.
+          if [ "$sync_rc" -ne 0 ]; then
+            echo "uv sync FAILED (rc=$sync_rc) — environment is broken; pytest result is not meaningful."
+            echo "exit_code=$sync_rc" >> "$GITHUB_OUTPUT"
+          else
+            echo "exit_code=$pytest_rc" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Open clean-bump PR
         if: |
