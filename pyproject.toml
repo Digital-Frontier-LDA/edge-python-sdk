@@ -24,7 +24,7 @@ classifiers = [
     "Topic :: System :: Distributed Computing",
 ]
 dependencies = [
-    "latitudesh-python-sdk==3.0.5",
+    "latitudesh-python-sdk==3.3.0",
     "httpx>=0.27",
     "pydantic>=2",
 ]
@@ -45,7 +45,7 @@ Changelog = "https://github.com/Digital-Frontier-LDA/edge-python-sdk/blob/main/C
 
 [tool.edge-python-sdk]
 upstream-package = "latitudesh-python-sdk"
-upstream-version = "3.0.5"
+upstream-version = "3.3.0"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/edge_python_sdk"]
