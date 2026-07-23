@@ -19,7 +19,39 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      # WHY A GITHUB APP AND NOT github.token
+      # -------------------------------------
+      # The org policy "Allow GitHub Actions to create and approve pull requests" is OFF
+      # org-wide, and the repo-level toggle is overridden by it (setting it returns 409).
+      # So the default GITHUB_TOKEN cannot open the sync PR — every run since 2026-07-03
+      # died on `GraphQL: GitHub Actions is not permitted to create ... (createPullRequest)`.
+      # Rather than loosen that control for EVERY repo in the org (which would also let any
+      # workflow self-APPROVE PRs), this workflow mints a short-lived token from a GitHub
+      # App scoped to this repo alone with `pull-requests: write` + `contents: write`.
+      # Setup is one-time and documented in docs/runbooks/sync-upstream-app.md.
+      - name: Preflight — require the sync App credentials
+        env:
+          APP_ID: ${{ secrets.SYNC_APP_ID }}
+          APP_KEY: ${{ secrets.SYNC_APP_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${APP_ID:-}" ] || [ -z "${APP_KEY:-}" ]; then
+            echo "::error title=Sync App not configured::SYNC_APP_ID and/or SYNC_APP_PRIVATE_KEY are unset. This workflow authenticates PR creation via a scoped GitHub App because the org blocks the default GITHUB_TOKEN from creating PRs. One-time setup: docs/runbooks/sync-upstream-app.md"
+            exit 1
+          fi
+
+      - name: Mint a scoped App token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ secrets.SYNC_APP_ID }}
+          private-key: ${{ secrets.SYNC_APP_PRIVATE_KEY }}
+
+      # Checked out WITH the App token so the later `git push` is authenticated as the App
+      # (not the default GITHUB_TOKEN), which is also what lets CI run on the resulting PR.
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Install uv
         uses: astral-sh/setup-uv@caf0cab7a618c569241d31dcd442f54681755d39 # v3
@@ -49,7 +81,7 @@ jobs:
         if: steps.drift.outputs.needs_bump == 'true'
         id: existing
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
           # Via env, NEVER interpolated into the script body. `to_version` originates
           # OUTSIDE this repo — scripts/refresh-upstream.sh reads it from the upstream
           # release feed — so a version string carrying shell metacharacters would be
@@ -163,7 +195,7 @@ jobs:
           && steps.patch_attempt.outputs.exit_code == '0'
           && steps.tests.outputs.exit_code == '0'
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
           FROM: ${{ steps.drift.outputs.from_version }}
           TO: ${{ steps.drift.outputs.to_version }}
           BRANCH: ${{ steps.existing.outputs.branch }}
@@ -192,7 +224,7 @@ jobs:
           && steps.existing.outputs.skip != 'true'
           && steps.patch_attempt.outputs.exit_code != '0'
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
           FROM: ${{ steps.drift.outputs.from_version }}
           TO: ${{ steps.drift.outputs.to_version }}
           BRANCH: ${{ steps.existing.outputs.branch }}
@@ -232,7 +264,7 @@ jobs:
           && steps.patch_attempt.outputs.exit_code == '0'
           && steps.tests.outputs.exit_code != '0'
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
           FROM: ${{ steps.drift.outputs.from_version }}
           TO: ${{ steps.drift.outputs.to_version }}
           BRANCH: ${{ steps.existing.outputs.branch }}
