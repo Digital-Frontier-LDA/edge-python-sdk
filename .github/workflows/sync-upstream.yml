@@ -49,12 +49,12 @@ jobs:
 
       # Checked out WITH the App token so the later `git push` is authenticated as the App
       # (not the default GITHUB_TOKEN), which is also what lets CI run on the resulting PR.
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           token: ${{ steps.app-token.outputs.token }}
 
       - name: Install uv
-        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        uses: astral-sh/setup-uv@caf0cab7a618c569241d31dcd442f54681755d39 # v3
 
       - name: Set up Python 3.13
         run: uv python install 3.13
